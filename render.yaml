@@ -1,0 +1,28 @@
+services:
+  # 1. Python FastAPI Backend Service
+  - type: web
+    name: railmate-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+
+  # 2. React Vite Frontend (Static Site)
+  - type: static
+    name: railmate-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: railmate-backend
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
